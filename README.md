@@ -51,7 +51,7 @@ someinternalhost_IP = 10.132.0.4
 
 Подключение к VPN серверу:
 ```
-sudo openvpn --config vpn/cloud-bastion.ovpn --auth-user-pass
+sudo openvpn --config cloud-bastion.ovpn
 
 Enter Auth Username: test
 Enter Auth Password: *******************************
