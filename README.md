@@ -1,5 +1,56 @@
 # alakhno_infra
 
+# ДЗ - Занятие 6
+
+Данные для подключения
+```
+testapp_IP = 34.76.204.172
+testapp_port = 9292
+```
+
+## 1. Деплой тестового приложения при помощи startup script
+
+Скрипт из локального файла:
+
+```
+gcloud compute instances create reddit-app \
+  --boot-disk-size=10GB \
+  --image-family ubuntu-1604-lts \
+  --image-project=ubuntu-os-cloud  \
+  --machine-type=g1-small \
+  --tags puma-server \
+  --restart-on-failure \
+  --metadata-from-file startup-script=startup.sh
+``` 
+
+Скрипт, доступный по ссылке:
+
+```
+gcloud compute instances create reddit-app \
+  --boot-disk-size=10GB \
+  --image-family ubuntu-1604-lts \
+  --image-project=ubuntu-os-cloud  \
+  --machine-type=g1-small \
+  --tags puma-server \
+  --restart-on-failure \
+  --metadata startup-script-url=gs://otus-devops/startup.sh
+``` 
+
+## 2. Добавление правила для файервола
+
+Добавление
+```
+gcloud compute firewall-rules create default-puma-server --allow tcp:9292
+```
+
+Проверка
+```
+$ nc -zv 34.76.204.172 9292
+Connection to 34.76.204.172 9292 port [tcp/*] succeeded!
+```
+
+# ДЗ - Занятие 5
+
 ## 1. Подключение к инстансу внутренней сети через Bastion host
 
 Чтобы подключиться к хосту someinternalhost внутренней сети  с локального
