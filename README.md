@@ -36,6 +36,19 @@ gcloud compute instances create reddit-app \
   --metadata startup-script-url=gs://otus-devops/startup.sh
 ``` 
 
+## 2. Добавление правила для файервола
+
+Добавление
+```
+gcloud compute firewall-rules create default-puma-server --allow tcp:9292
+```
+
+Проверка
+```
+$ nc -zv 34.76.204.172 9292
+Connection to 34.76.204.172 9292 port [tcp/*] succeeded!
+```
+
 # ДЗ - Занятие 5
 
 ## 1. Подключение к инстансу внутренней сети через Bastion host
