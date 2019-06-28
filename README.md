@@ -1,5 +1,13 @@
 # alakhno_infra
 
+# ДЗ - Занятие 7
+
+## 1. Создание образа из Packer шаблона с пользовательскими переменными
+
+```
+packer build -var-file=variables.json ubuntu16.json
+```
+
 # ДЗ - Занятие 6
 
 Данные для подключения
