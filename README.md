@@ -4,9 +4,24 @@
 
 ## 1. Создание образа из Packer шаблона с пользовательскими переменными
 
+Проверка шаблона
+```
+packer validate -var-file=variables.json ubuntu16.json
+```
+
+Создание образа
 ```
 packer build -var-file=variables.json ubuntu16.json
 ```
+
+Создание инстанса из образа
+```
+gcloud compute instances create reddit-app \
+  --image-family reddit-base \
+  --machine-type=f1-micro \
+  --tags=puma-server
+``` 
+
 
 # ДЗ - Занятие 6
 
@@ -48,7 +63,9 @@ gcloud compute instances create reddit-app \
 
 Добавление
 ```
-gcloud compute firewall-rules create default-puma-server --allow tcp:9292
+gcloud compute firewall-rules create default-puma-server \
+  --target-tags=puma-server \
+  --allow=tcp:9292
 ```
 
 Проверка
