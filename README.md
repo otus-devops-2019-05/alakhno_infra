@@ -30,15 +30,15 @@ gcloud compute instances create reddit-app \
 
 Проверка шаблона
 ```
-packer validate -var 'project_id=<PROJECT_ID>' immutable.json
+packer validate -var-file=files/variables.json immutable.json
 ```
 
 Создание образа
 ```
-packer build -var 'project_id=<PROJECT_ID>' immutable.json
+packer build -var-file=files/variables.json immutable.json
 ```
 
-Создание инстанса из образа
+Создание инстанса из образа (create-reddit-vm.sh)
 ```
 gcloud compute instances create reddit-app \
   --image-family reddit-full \

@@ -3,3 +3,4 @@
 
 # Packer
 packer/variables.json
+packer/files/variables.json
