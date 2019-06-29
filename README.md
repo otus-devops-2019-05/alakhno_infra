@@ -2,7 +2,7 @@
 
 # ДЗ - Занятие 7
 
-## 1. Создание образа из Packer шаблона с пользовательскими переменными
+## 1. Создание образа Ubuntu 16 с Ruby и MonoDB
 
 Проверка шаблона
 ```
@@ -22,6 +22,29 @@ gcloud compute instances create reddit-app \
   --tags=puma-server
 ``` 
 
+## 2. Создание baked образа с приложением
+
+Конфиг приложения reddit.service для systemd сделан на основе
+[примера](https://github.com/puma/puma/blob/master/docs/systemd.md)
+из документации Ruby/Rack веб-сервера puma.
+
+Проверка шаблона
+```
+packer validate -var 'project_id=<PROJECT_ID>' immutable.json
+```
+
+Создание образа
+```
+packer build -var 'project_id=<PROJECT_ID>' immutable.json
+```
+
+Создание инстанса из образа
+```
+gcloud compute instances create reddit-app \
+  --image-family reddit-full \
+  --machine-type=f1-micro \
+  --tags=puma-server
+``` 
 
 # ДЗ - Занятие 6
 
