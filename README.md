@@ -1,5 +1,22 @@
 # alakhno_infra
 
+# ДЗ - Занятие 8
+
+## 1. Добавление ssh-ключей нескольких пользователей
+
+Для добавления ssh-ключей нескольких пользователей можно использовать
+[heredoc синтаксис](https://www.terraform.io/docs/configuration-0-11/variables.html#strings).
+
+```
+  metadata {
+    ssh-keys = <<EOF
+appuser:${file(var.public_key_path)}
+appuser1:${file(var.public_key_path)}
+appuser2:${file(var.public_key_path)}
+EOF
+  }
+```
+
 # ДЗ - Занятие 7
 
 ## 1. Создание образа Ubuntu 16 с Ruby и MonoDB
