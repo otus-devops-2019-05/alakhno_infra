@@ -11,6 +11,7 @@ resource "google_compute_instance_group" "app-group" {
 
   instances = [
     "${google_compute_instance.app.self_link}",
+    "${google_compute_instance.app2.self_link}",
   ]
 }
 

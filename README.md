@@ -41,6 +41,23 @@ appuser_web.
 5. [google_compute_target_http_proxy](https://www.terraform.io/docs/providers/google/r/compute_target_http_proxy.html)
 6. [google_compute_global_forwarding_rule](https://www.terraform.io/docs/providers/google/r/compute_global_forwarding_rule.html)
 
+## 4. Добавление второго инстанса с приложением
+
+Для добавления инстанса `app2` можно скопировать конфиг инстанса `app`:
+ 
+```
+resource "google_compute_instance" "app" {
+  ...
+}
+
+resource "google_compute_instance" "app2" {
+  ...
+}
+```
+
+Но тогда при внесении изменений в конфигурацию инстанса придётся вносить
+изменение в нескольких местах.
+
 # ДЗ - Занятие 7
 
 ## 1. Создание образа Ubuntu 16 с Ruby и MonoDB
