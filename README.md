@@ -58,6 +58,37 @@ resource "google_compute_instance" "app2" {
 Но тогда при внесении изменений в конфигурацию инстанса придётся вносить
 изменение в нескольких местах.
 
+## 5. Параметризация количества инстансов с приложением
+
+Для задания количества инстансов можно использовать параметр `count`:
+
+```
+resource "google_compute_instance" "app" {
+  name         = "reddit-app-${count.index + 1}"
+  count        = "${var.count}"
+  ...
+}
+```
+
+При этом в балансировщике и output переменных используется `*`:
+```
+resource "google_compute_instance_group" "app-group" {
+  name        = "reddit-app-group"
+
+  ...
+  
+  instances = [
+    "${google_compute_instance.app.*.self_link}",
+  ]
+}
+```
+
+Создание конфигурации с двумя инстансами:
+
+```
+terraform apply -var 'count=2'
+```
+
 # ДЗ - Занятие 7
 
 ## 1. Создание образа Ubuntu 16 с Ruby и MonoDB
