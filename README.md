@@ -26,6 +26,21 @@ Terraform ничего не знает про ssh-ключ пользовате�
 указанных в конфиге main.tf (appuser, appuser1, appuser2), и для пользователя
 appuser_web. 
 
+## 3. Создание HTTP балансировщика
+
+Использованные ссылки на документацию Google Cloud:
+1. [Балансировка нагрузки в Google Cloud](https://cloud.google.com/load-balancing/)
+2. [Процесс настройки HTTP(S) балансировщика](https://cloud.google.com/load-balancing/docs/https/setting-up-https)
+3. [Архитектура HTTP(S) балансировщика](https://cloud.google.com/load-balancing/docs/https/)
+
+Составные части балансировщика в документации Terraform:
+1. [google_compute_instance_group](https://www.terraform.io/docs/providers/google/r/compute_instance_group.html)
+2. [google_compute_health_check](https://www.terraform.io/docs/providers/google/r/compute_health_check.html)
+3. [google_compute_backend_service](https://www.terraform.io/docs/providers/google/d/datasource_google_compute_backend_service.html)
+4. [google_compute_url_map](https://www.terraform.io/docs/providers/google/r/compute_url_map.html)
+5. [google_compute_target_http_proxy](https://www.terraform.io/docs/providers/google/r/compute_target_http_proxy.html)
+6. [google_compute_global_forwarding_rule](https://www.terraform.io/docs/providers/google/r/compute_global_forwarding_rule.html)
+
 # ДЗ - Занятие 7
 
 ## 1. Создание образа Ubuntu 16 с Ruby и MonoDB
