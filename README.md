@@ -1,5 +1,94 @@
 # alakhno_infra
 
+# ДЗ - Занятие 8
+
+## 1. Добавление ssh-ключей нескольких пользователей
+
+Для добавления ssh-ключей нескольких пользователей можно использовать
+[heredoc синтаксис](https://www.terraform.io/docs/configuration-0-11/variables.html#strings).
+
+```
+  metadata {
+    ssh-keys = <<EOF
+appuser:${file(var.public_key_path)}
+appuser1:${file(var.public_key_path)}
+appuser2:${file(var.public_key_path)}
+EOF
+  }
+```
+
+## 2. Добавление ssh-ключа в метаданные проекта через веб интферфейс
+
+Terraform ничего не знает про ssh-ключ пользователя appuser_web, добавленный
+в метаданные проекта через веб интерфейс.
+
+При этом инстанс google_compute_instance.app доступен и для пользователей,
+указанных в конфиге main.tf (appuser, appuser1, appuser2), и для пользователя
+appuser_web. 
+
+## 3. Создание HTTP балансировщика
+
+Использованные ссылки на документацию Google Cloud:
+1. [Балансировка нагрузки в Google Cloud](https://cloud.google.com/load-balancing/)
+2. [Процесс настройки HTTP(S) балансировщика](https://cloud.google.com/load-balancing/docs/https/setting-up-https)
+3. [Архитектура HTTP(S) балансировщика](https://cloud.google.com/load-balancing/docs/https/)
+
+Составные части балансировщика в документации Terraform:
+1. [google_compute_instance_group](https://www.terraform.io/docs/providers/google/r/compute_instance_group.html)
+2. [google_compute_health_check](https://www.terraform.io/docs/providers/google/r/compute_health_check.html)
+3. [google_compute_backend_service](https://www.terraform.io/docs/providers/google/d/datasource_google_compute_backend_service.html)
+4. [google_compute_url_map](https://www.terraform.io/docs/providers/google/r/compute_url_map.html)
+5. [google_compute_target_http_proxy](https://www.terraform.io/docs/providers/google/r/compute_target_http_proxy.html)
+6. [google_compute_global_forwarding_rule](https://www.terraform.io/docs/providers/google/r/compute_global_forwarding_rule.html)
+
+## 4. Добавление второго инстанса с приложением
+
+Для добавления инстанса `app2` можно скопировать конфиг инстанса `app`:
+ 
+```
+resource "google_compute_instance" "app" {
+  ...
+}
+
+resource "google_compute_instance" "app2" {
+  ...
+}
+```
+
+Но тогда при внесении изменений в конфигурацию инстанса придётся вносить
+изменение в нескольких местах.
+
+## 5. Параметризация количества инстансов с приложением
+
+Для задания количества инстансов можно использовать параметр `count`:
+
+```
+resource "google_compute_instance" "app" {
+  name         = "reddit-app-${count.index + 1}"
+  count        = "${var.count}"
+  ...
+}
+```
+
+При этом в балансировщике и output переменных используется `*`:
+```
+resource "google_compute_instance_group" "app-group" {
+  name        = "reddit-app-group"
+
+  ...
+  
+  instances = [
+    "${google_compute_instance.app.*.self_link}",
+  ]
+}
+```
+
+Создание конфигурации с двумя инстансами:
+
+```
+terraform apply -var 'count=2'
+```
+
 # ДЗ - Занятие 7
 
 ## 1. Создание образа Ubuntu 16 с Ruby и MonoDB

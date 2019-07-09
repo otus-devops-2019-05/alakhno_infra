@@ -4,3 +4,10 @@
 # Packer
 packer/variables.json
 packer/files/variables.json
+
+# Terraform
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+*.tfvars
+.terraform/
