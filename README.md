@@ -63,7 +63,7 @@ terraform apply
 
 Проверка наличия бакетов:
 ```
-gsutil ls
+$ gsutil ls
 gs://storage-bucket-cat/
 gs://storage-bucket-dog/
 ```
@@ -73,6 +73,48 @@ gs://storage-bucket-dog/
 echo "Test" > test.txt
 gsutil mv test.txt gs://storage-bucket-cat/
 ```
+
+## 4. Хранение state файла в удалённом бэкенде
+
+Прописал настройки для хранения state файла в Google Cloud Storage.
+
+Для Stage и Prod окружений используется один и тот же бакет, но с разными
+префиксами:
+
+```
+terraform {
+  backend "gcs" {
+    bucket = "otus-devops"
+    prefix = "prod" # для prod окружения
+  }
+}
+```
+
+При попытке одновременного применения конфигурации срабатывает блокировка:
+
+```
+$ terraform apply
+Acquiring state lock. This may take a few moments...
+
+Error: Error locking state: Error acquiring the state lock: writing "gs://otus-devops/prod/default.tflock" failed: googleapi: Error 412: Precondition Failed, conditionNotMet
+Lock Info:
+  ID:        1562946612640678
+  Path:      gs://otus-devops/prod/default.tflock
+  Operation: OperationTypeApply
+  Who:       alakhno@thinkpad-x250
+  Version:   0.11.11
+  Created:   2019-07-12 15:50:12.51507322 +0000 UTC
+  Info:      
+
+
+Terraform acquires a state lock to protect the state from being written
+by multiple users at the same time. Please resolve the issue above and try
+again. For most commands, you can disable locking with the "-lock=false"
+flag, but this is not recommended.
+``` 
+
+Поменял регион для Prod окружения на europe-west3, так как terraform
+ругался на нехватку ресурсов в europe-west2.
 
 # ДЗ - Занятие 8
 
