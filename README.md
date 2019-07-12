@@ -1,5 +1,57 @@
 # alakhno_infra
 
+# ДЗ - Занятие 9
+
+## 1. Переиспользование модулей при конфигурации окружений Stage и Prod
+
+> Инфраструктура в обоих окружениях будет идентична, однако будет иметь
+> небольшие различия: мы откроем SSH доступ для всех IP адресов в окружении
+> Stage, а в окружении Prod откроем доступ только для своего IP
+
+### Создание Stage окружения
+
+```
+cd terraform/stage/
+terraform init
+terraform get
+terraform apply
+```
+
+### Создание Prod окружения
+
+Для задания своего IP добавлена переменная `ssh_source_ip`, значение которой
+надо указать в `terraform/prod/terraform.tfvars`.
+
+```
+cd terraform/prod/
+terraform init
+terraform get
+terraform apply
+```
+
+
+## 2. Дополнительная параметризация модулей
+
+Описанная в методичке параметризация модулей не позволяет одновременно создать
+Stage и Prod окружения из-за конфликтов имён ресурсов. Для решения проблемы в
+параметры модулей была добавлена переменная `env`.
+
+При создании второго окружения возникла ошибка:
+
+```
+Error: Error applying plan:
+
+1 error(s) occurred:
+
+* module.app.google_compute_address.app_ip: 1 error(s) occurred:
+
+* google_compute_address.app_ip: Error creating Address: googleapi: Error 403: Quota 'STATIC_ADDRESSES' exceeded. Limit: 1.0 in region europe-west1., quotaExceeded
+```
+
+Чтобы уложиться в ограничение пробного аккаунта на количество внешних IP
+адресов в одном регионе, Stage и Prod окружения были разнесены по разным
+регионам: `europe-west1` и `europe-west2` соответсвенно. 
+
 # ДЗ - Занятие 8
 
 ## 1. Добавление ssh-ключей нескольких пользователей

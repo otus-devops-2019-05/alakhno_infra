@@ -6,6 +6,7 @@ provider "google" {
 
 module "app" {
   source          = "../modules/app"
+  env             = "stage"
   public_key_path = "${var.public_key_path}"
   zone            = "${var.zone}"
   app_disk_image  = "${var.app_disk_image}"
@@ -13,6 +14,7 @@ module "app" {
 
 module "db" {
   source          = "../modules/db"
+  env             = "stage"
   public_key_path = "${var.public_key_path}"
   zone            = "${var.zone}"
   db_disk_image   = "${var.db_disk_image}"
@@ -20,5 +22,6 @@ module "db" {
 
 module "vpc" {
   source        = "../modules/vpc"
+  env           = "stage"
   source_ranges = ["0.0.0.0/0"]
 }

@@ -1,3 +1,7 @@
+variable "env" {
+  description = "Environment: stage, prod, etc."
+}
+
 variable public_key_path {
   description = "Path to the public key used for ssh access"
 }
