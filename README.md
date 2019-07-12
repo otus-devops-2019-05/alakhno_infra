@@ -52,6 +52,28 @@ Error: Error applying plan:
 адресов в одном регионе, Stage и Prod окружения были разнесены по разным
 регионам: `europe-west1` и `europe-west2` соответсвенно. 
 
+## 3. Создание бакетов при помощи модуля из реестра
+
+```
+cd terraform/
+terraform init
+terraform get
+terraform apply
+```
+
+Проверка наличия бакетов:
+```
+gsutil ls
+gs://storage-bucket-cat/
+gs://storage-bucket-dog/
+```
+
+Загрузка файла в бакет:
+```
+echo "Test" > test.txt
+gsutil mv test.txt gs://storage-bucket-cat/
+```
+
 # ДЗ - Занятие 8
 
 ## 1. Добавление ssh-ключей нескольких пользователей
