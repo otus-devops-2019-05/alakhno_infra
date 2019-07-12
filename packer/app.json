@@ -12,9 +12,9 @@
         {
             "type": "googlecompute",
             "project_id": "{{user `project_id`}}",
-            "image_name": "reddit-app-{{timestamp}}",
+            "image_name": "reddit-app-base-{{timestamp}}",
             "image_description": "Ubuntu 16 with Ruby",
-            "image_family": "reddit-app",
+            "image_family": "reddit-app-base",
             "source_image_family": "{{user `source_image_family`}}",
             "zone": "europe-west1-b",
             "ssh_username": "appuser",

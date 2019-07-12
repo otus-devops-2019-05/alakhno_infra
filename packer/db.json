@@ -12,9 +12,9 @@
         {
             "type": "googlecompute",
             "project_id": "{{user `project_id`}}",
-            "image_name": "reddit-db-{{timestamp}}",
+            "image_name": "reddit-db-base-{{timestamp}}",
             "image_description": "Ubuntu 16 with MongoDB",
-            "image_family": "reddit-db",
+            "image_family": "reddit-db-base",
             "source_image_family": "{{user `source_image_family`}}",
             "zone": "europe-west1-b",
             "ssh_username": "appuser",
