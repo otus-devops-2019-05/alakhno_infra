@@ -1,5 +1,190 @@
 # alakhno_infra
 
+# ДЗ - Занятие 9
+
+## 1. Переиспользование модулей при конфигурации окружений Stage и Prod
+
+> Инфраструктура в обоих окружениях будет идентична, однако будет иметь
+> небольшие различия: мы откроем SSH доступ для всех IP адресов в окружении
+> Stage, а в окружении Prod откроем доступ только для своего IP
+
+### Создание Stage окружения
+
+```
+cd terraform/stage/
+terraform init
+terraform get
+terraform apply
+```
+
+### Создание Prod окружения
+
+Для задания своего IP добавлена переменная `ssh_source_ip`, значение которой
+надо указать в `terraform/prod/terraform.tfvars`.
+
+```
+cd terraform/prod/
+terraform init
+terraform get
+terraform apply
+```
+
+
+## 2. Дополнительная параметризация модулей
+
+Описанная в методичке параметризация модулей не позволяет одновременно создать
+Stage и Prod окружения из-за конфликтов имён ресурсов. Для решения проблемы в
+параметры модулей была добавлена переменная `env`.
+
+При создании второго окружения возникла ошибка:
+
+```
+Error: Error applying plan:
+
+1 error(s) occurred:
+
+* module.app.google_compute_address.app_ip: 1 error(s) occurred:
+
+* google_compute_address.app_ip: Error creating Address: googleapi: Error 403: Quota 'STATIC_ADDRESSES' exceeded. Limit: 1.0 in region europe-west1., quotaExceeded
+```
+
+Чтобы уложиться в ограничение пробного аккаунта на количество внешних IP
+адресов в одном регионе, Stage и Prod окружения были разнесены по разным
+регионам: `europe-west1` и `europe-west2` соответсвенно. 
+
+## 3. Создание бакетов при помощи модуля из реестра
+
+```
+cd terraform/
+terraform init
+terraform get
+terraform apply
+```
+
+Проверка наличия бакетов:
+```
+$ gsutil ls
+gs://storage-bucket-cat/
+gs://storage-bucket-dog/
+```
+
+Загрузка файла в бакет:
+```
+echo "Test" > test.txt
+gsutil mv test.txt gs://storage-bucket-cat/
+```
+
+## 4. Хранение state файла в удалённом бэкенде
+
+Прописал настройки для хранения state файла в Google Cloud Storage.
+
+Для Stage и Prod окружений используется один и тот же бакет, но с разными
+префиксами:
+
+```
+terraform {
+  backend "gcs" {
+    bucket = "otus-devops"
+    prefix = "prod" # для prod окружения
+  }
+}
+```
+
+При попытке одновременного применения конфигурации срабатывает блокировка:
+
+```
+$ terraform apply
+Acquiring state lock. This may take a few moments...
+
+Error: Error locking state: Error acquiring the state lock: writing "gs://otus-devops/prod/default.tflock" failed: googleapi: Error 412: Precondition Failed, conditionNotMet
+Lock Info:
+  ID:        1562946612640678
+  Path:      gs://otus-devops/prod/default.tflock
+  Operation: OperationTypeApply
+  Who:       alakhno@thinkpad-x250
+  Version:   0.11.11
+  Created:   2019-07-12 15:50:12.51507322 +0000 UTC
+  Info:      
+
+
+Terraform acquires a state lock to protect the state from being written
+by multiple users at the same time. Please resolve the issue above and try
+again. For most commands, you can disable locking with the "-lock=false"
+flag, but this is not recommended.
+``` 
+
+Поменял регион для Prod окружения на europe-west3, так как terraform
+ругался на нехватку ресурсов в europe-west2.
+
+## 5. Деплой приложения
+
+### Модуль app
+
+Значение переменной окружения DATABASE_URL, которая нужна для запуска сервиса
+приложения puma.service можно задать при помощи директивы Environment 
+([подробнее](https://coreos.com/os/docs/latest/using-environment-variables-in-systemd-units.html)):
+```
+Environment='DATABASE_URL=${var.database_url}'
+```
+
+Приложение деплоится при помощи provisioner'ов:
+
+```
+  provisioner "file" {
+    content     = "${data.template_file.puma_service.rendered}"
+    destination = "/tmp/puma.service"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/files/deploy.sh"
+    destination = "/tmp/deploy.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "${var.app_deploy ? "sh /tmp/deploy.sh" : "echo 'App deploy disabled'"}",
+    ]
+  }
+```
+
+При работе с файлами из директории модуля удобно использовать `${path.module}`
+([документация](https://www.terraform.io/docs/configuration-0-11/interpolation.html#path-information)). 
+
+Для параметризации puma.service удобно использовать источник данных `template_file`
+([подробнее](https://www.terraform.io/docs/providers/template/d/file.html)).
+
+```
+data "template_file" "puma_service" {
+  template = "${file("${path.module}/files/puma.service.tpl")}"
+
+  vars = {
+    database_url = "${var.database_url}"
+  }
+}
+```
+
+### Модуль db
+
+По умолчанию MongoDB не позволяет подключаться с внешних IP адресов:
+https://docs.mongodb.com/manual/core/security-mongodb-configuration/
+
+Поэтому добавил в модуль db конфиг mongod.conf с `net.bindIp: 0.0.0.0`.
+Конфиг деплоится при помощи provisioner'ов:
+
+```
+  provisioner "file" {
+    source      = "${path.module}/files/mongod.conf"
+    destination = "/tmp/mongod.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mv /tmp/mongod.conf /etc/mongod.conf",
+      "sudo systemctl restart mongod",
+    ]
+  }
+```
+
 # ДЗ - Занятие 8
 
 ## 1. Добавление ssh-ключей нескольких пользователей
