@@ -131,18 +131,17 @@ Environment='DATABASE_URL=${var.database_url}'
 
 ```
   provisioner "file" {
-    source      = "${path.module}/files/puma.service"
+    content     = "${data.template_file.puma_service.rendered}"
     destination = "/tmp/puma.service"
   }
 
   provisioner "file" {
-    source = "${path.module}/files/deploy.sh"
+    source      = "${path.module}/files/deploy.sh"
     destination = "/tmp/deploy.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "echo Environment='DATABASE_URL=${var.database_url}' >> /tmp/puma.service",
       "${var.app_deploy ? "sh /tmp/deploy.sh" : "echo 'App deploy disabled'"}",
     ]
   }
@@ -150,6 +149,19 @@ Environment='DATABASE_URL=${var.database_url}'
 
 При работе с файлами из директории модуля удобно использовать `${path.module}`
 ([документация](https://www.terraform.io/docs/configuration-0-11/interpolation.html#path-information)). 
+
+Для параметризации puma.service удобно использовать источник данных `template_file`
+([подробнее](https://www.terraform.io/docs/providers/template/d/file.html)).
+
+```
+data "template_file" "puma_service" {
+  template = "${file("${path.module}/files/puma.service.tpl")}"
+
+  vars = {
+    database_url = "${var.database_url}"
+  }
+}
+```
 
 ### Модуль db
 

@@ -1,3 +1,11 @@
+data "template_file" "puma_service" {
+  template = "${file("${path.module}/files/puma.service.tpl")}"
+
+  vars = {
+    database_url = "${var.database_url}"
+  }
+}
+
 resource "google_compute_instance" "app" {
   name         = "reddit-app-${var.env}"
   machine_type = "g1-small"
@@ -31,7 +39,7 @@ resource "google_compute_instance" "app" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/files/puma.service"
+    content     = "${data.template_file.puma_service.rendered}"
     destination = "/tmp/puma.service"
   }
 
@@ -42,7 +50,6 @@ resource "google_compute_instance" "app" {
 
   provisioner "remote-exec" {
     inline = [
-      "echo Environment='DATABASE_URL=${var.database_url}' >> /tmp/puma.service",
       "${var.app_deploy ? "sh /tmp/deploy.sh" : "echo 'App deploy disabled'"}",
     ]
   }
