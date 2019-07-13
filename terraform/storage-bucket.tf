@@ -1,11 +1,11 @@
 provider "google" {
   version = "2.0.0"
   project = "${var.project}"
-  region = "${var.region}"
+  region  = "${var.region}"
 }
 
 module "storage-bucket" {
-  source = "SweetOps/storage-bucket/google"
+  source  = "SweetOps/storage-bucket/google"
   version = "0.1.1"
 
   name = ["storage-bucket-cat", "storage-bucket-dog"]

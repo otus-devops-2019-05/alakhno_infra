@@ -116,6 +116,63 @@ flag, but this is not recommended.
 Поменял регион для Prod окружения на europe-west3, так как terraform
 ругался на нехватку ресурсов в europe-west2.
 
+## 5. Деплой приложения
+
+### Модуль app
+
+Значение переменной окружения DATABASE_URL, которая нужна для запуска сервиса
+приложения puma.service можно задать при помощи директивы Environment 
+([подробнее](https://coreos.com/os/docs/latest/using-environment-variables-in-systemd-units.html)):
+```
+Environment='DATABASE_URL=${var.database_url}'
+```
+
+Приложение деплоится при помощи provisioner'ов:
+
+```
+  provisioner "file" {
+    source      = "${path.module}/files/puma.service"
+    destination = "/tmp/puma.service"
+  }
+
+  provisioner "file" {
+    source = "${path.module}/files/deploy.sh"
+    destination = "/tmp/deploy.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo Environment='DATABASE_URL=${var.database_url}' >> /tmp/puma.service",
+      "${var.app_deploy ? "sh /tmp/deploy.sh" : "echo 'App deploy disabled'"}",
+    ]
+  }
+```
+
+При работе с файлами из директории модуля удобно использовать `${path.module}`
+([документация](https://www.terraform.io/docs/configuration-0-11/interpolation.html#path-information)). 
+
+### Модуль db
+
+По умолчанию MongoDB не позволяет подключаться с внешних IP адресов:
+https://docs.mongodb.com/manual/core/security-mongodb-configuration/
+
+Поэтому добавил в модуль db конфиг mongod.conf с `net.bindIp: 0.0.0.0`.
+Конфиг деплоится при помощи provisioner'ов:
+
+```
+  provisioner "file" {
+    source      = "${path.module}/files/mongod.conf"
+    destination = "/tmp/mongod.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mv /tmp/mongod.conf /etc/mongod.conf",
+      "sudo systemctl restart mongod",
+    ]
+  }
+```
+
 # ДЗ - Занятие 8
 
 ## 1. Добавление ssh-ключей нескольких пользователей

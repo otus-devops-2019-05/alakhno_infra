@@ -33,3 +33,8 @@ variable db_disk_image {
 variable ssh_source_ip {
   description = "SSH allowed IP address"
 }
+
+variable app_deploy {
+  description = "Enable app deploy"
+  default     = true
+}

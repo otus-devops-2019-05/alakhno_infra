@@ -18,6 +18,26 @@ resource "google_compute_instance" "db" {
   metadata {
     ssh-keys = "appuser:${file(var.public_key_path)}"
   }
+
+  connection {
+    type  = "ssh"
+    user  = "appuser"
+    agent = false
+
+    private_key = "${file(var.private_key_path)}"
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/files/mongod.conf"
+    destination = "/tmp/mongod.conf"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mv /tmp/mongod.conf /etc/mongod.conf",
+      "sudo systemctl restart mongod",
+    ]
+  }
 }
 
 resource "google_compute_firewall" "firewall_mongo" {
@@ -30,5 +50,4 @@ resource "google_compute_firewall" "firewall_mongo" {
   }
 
   target_tags = ["reddit-db-${var.env}"]
-  source_tags = ["reddit-app-${var.env}"]
 }
