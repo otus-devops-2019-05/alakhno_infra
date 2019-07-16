@@ -2,7 +2,7 @@
 set -e
 
 cd ../terraform/stage/
-terraform init
+terraform init > /dev/null
 APP_IP=`terraform output app_external_ip`
 DB_IP=`terraform output db_external_ip`
 cd - > /dev/null
