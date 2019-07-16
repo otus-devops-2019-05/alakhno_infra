@@ -33,6 +33,69 @@ PLAY RECAP *********************************************************************
 appserver                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 ```
 
+## 2. JSON для динамического инвентори
+
+### Динамический JSON инвентори
+
+Генерируется скриптом dynamic_inventory.sh:
+
+```
+$ ./dynamic_inventory.sh --list
+
+{
+  "_meta": {
+    "hostvars": {}
+  },
+  "app": {
+    "children": ["appserver"]
+  },
+  "db": {
+    "children": ["dbserver"]
+  },
+  "appserver": ["35.241.154.57"],
+  "dbserver": ["35.205.123.198"]
+}
+```
+
+Адреса хостов скрипт получает при помощи команды `terraform output`.
+
+Использование динамического инвентори можно прописать в ansible.cfg:
+
+```
+[defaults]
+inventory = ./dynamic_inventory.sh
+...
+```
+
+Проверка работы:
+```
+$ ansible all -m ping
+```
+
+### Статический JSON инвентори 
+
+Можно сконвертировать из inventory.yml:
+
+```
+$ yq r -j inventory.yml | json_pp
+
+{
+  "app" : {
+    "hosts" : {
+      "appserver" : {
+        "ansible_host" : "35.241.154.57"
+      }
+    }
+  },
+  "db" : {
+    "hosts" : {
+      "dbserver" : {
+        "ansible_host" : "35.205.123.198"
+      }
+    }
+  }
+}
+```
 
 # ДЗ - Занятие 9
 
