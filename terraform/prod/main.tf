@@ -22,6 +22,7 @@ module "db" {
   private_key_path = "${var.private_key_path}"
   zone             = "${var.zone}"
   db_disk_image    = "${var.db_disk_image}"
+  db_bind_ip_all   = "${var.db_bind_ip_all}"
 }
 
 module "vpc" {

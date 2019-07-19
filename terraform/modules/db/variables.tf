@@ -18,3 +18,7 @@ variable db_disk_image {
   description = "Disk image for reddit db"
   default     = "reddit-db-base"
 }
+
+variable db_bind_ip_all {
+  description = "Bind all IP addresses for db"
+}
