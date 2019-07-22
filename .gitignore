@@ -14,3 +14,4 @@ packer/files/variables.json
 
 # Ansible
 *.retry
+service_account.json
