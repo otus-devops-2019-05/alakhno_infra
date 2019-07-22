@@ -27,6 +27,34 @@ db_host: "{{ hostvars[groups['db'][0]]['networkInterfaces'][0]['networkIP'] }}"
 
 Подробнее: https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#accessing-information-about-other-hosts-with-magic-variables
 
+## 2. Провижининг в Packer
+
+В плейбуках для провижининга используются следующие модули:
+- [apt](https://docs.ansible.com/ansible/latest/modules/apt_module.html#apt-module)
+- [apt_key](https://docs.ansible.com/ansible/latest/modules/apt_key_module.html#apt-key-module)
+- [apt_repository](https://docs.ansible.com/ansible/latest/modules/apt_repository_module.html#apt-repository-module)
+- [systemd](https://docs.ansible.com/ansible/latest/modules/systemd_module.html#systemd-module)
+
+Не забыть добавить ранее удалённое правило файервола для доступа по ssh.
+
+Сборка образов:
+```
+packer build -var-file=packer/variables.json packer/app.json
+packer build -var-file=packer/variables.json packer/db.json
+```
+
+Создание инстансов:
+```
+cd terraform/stage
+terraform apply
+```
+
+Деплой приложения:
+```
+cd ansible
+ansible-playbook site.yml
+```
+
 # ДЗ - Занятие 10
 
 ## 1. Playbook для клонирования репозитория с приложением на app сервер

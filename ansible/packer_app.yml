@@ -1,0 +1,13 @@
+---
+- name: Install Ruby
+  hosts: all
+  become: true
+  tasks:
+    - name: Install packages
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - ruby-full
+        - ruby-bundler
+        - build-essential
