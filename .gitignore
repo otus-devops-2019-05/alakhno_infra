@@ -11,3 +11,7 @@ packer/files/variables.json
 *.tfstate.backup
 *.tfvars
 .terraform/
+
+# Ansible
+*.retry
+service_account.json

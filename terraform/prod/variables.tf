@@ -38,3 +38,8 @@ variable app_deploy {
   description = "Enable app deploy"
   default     = true
 }
+
+variable db_bind_ip_all {
+  description = "Bind all IP addresses for db"
+  default     = true
+}

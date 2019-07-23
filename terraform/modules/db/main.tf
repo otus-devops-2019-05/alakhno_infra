@@ -34,7 +34,7 @@ resource "google_compute_instance" "db" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv /tmp/mongod.conf /etc/mongod.conf",
+      "${var.db_bind_ip_all ? "sudo mv /tmp/mongod.conf /etc/mongod.conf" : "echo 'Using default mongod.conf'"}",
       "sudo systemctl restart mongod",
     ]
   }

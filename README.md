@@ -1,5 +1,60 @@
 # alakhno_infra
 
+# ДЗ - Занятие 11
+
+## 1. Динамический инвентори для GCP
+
+Динамический инвентори для GCP можно получить при помощи gcp_compute:
+https://docs.ansible.com/ansible/latest/scenario_guides/guide_gce.html
+
+Файл service_account.json с ключами сервисного пользователя добавляем в
+.gitignore, чтобы случайно не закоммитить.
+
+Чтобы добавить инстансы в группы 'app' и 'db' в inventory.gcp.yml можно
+прописать правила, основанные на именах инстансов в GCP:
+```
+groups:
+  app: "'reddit-app' in name"
+  db: "'reddit-db' in name"
+```
+
+Внутренний адрес инстанса с базой данных, использующийся в app.yml, можно
+получить следующим образом:
+
+```
+db_host: "{{ hostvars[groups['db'][0]]['networkInterfaces'][0]['networkIP'] }}"
+```
+
+Подробнее: https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#accessing-information-about-other-hosts-with-magic-variables
+
+## 2. Провижининг в Packer
+
+В плейбуках для провижининга используются следующие модули:
+- [apt](https://docs.ansible.com/ansible/latest/modules/apt_module.html#apt-module)
+- [apt_key](https://docs.ansible.com/ansible/latest/modules/apt_key_module.html#apt-key-module)
+- [apt_repository](https://docs.ansible.com/ansible/latest/modules/apt_repository_module.html#apt-repository-module)
+- [systemd](https://docs.ansible.com/ansible/latest/modules/systemd_module.html#systemd-module)
+
+Не забыть добавить ранее удалённое правило файервола для доступа по ssh.
+
+Сборка образов:
+```
+packer build -var-file=packer/variables.json packer/app.json
+packer build -var-file=packer/variables.json packer/db.json
+```
+
+Создание инстансов:
+```
+cd terraform/stage
+terraform apply
+```
+
+Деплой приложения:
+```
+cd ansible
+ansible-playbook site.yml
+```
+
 # ДЗ - Занятие 10
 
 ## 1. Playbook для клонирования репозитория с приложением на app сервер
