@@ -18,8 +18,16 @@ resource "google_compute_instance" "db" {
   metadata {
     ssh-keys = "appuser:${file(var.public_key_path)}"
   }
+}
+
+resource "null_resource" "db_conf" {
+  count = "${var.db_bind_ip_all ? 1 : 0}"
+  triggers = {
+    app_instance_id = "google_compute_instance.db.id"
+  }
 
   connection {
+    host  = "${google_compute_instance.db.network_interface.0.access_config.0.nat_ip}"
     type  = "ssh"
     user  = "appuser"
     agent = false
@@ -34,7 +42,7 @@ resource "google_compute_instance" "db" {
 
   provisioner "remote-exec" {
     inline = [
-      "${var.db_bind_ip_all ? "sudo mv /tmp/mongod.conf /etc/mongod.conf" : "echo 'Using default mongod.conf'"}",
+      "sudo mv /tmp/mongod.conf /etc/mongod.conf",
       "sudo systemctl restart mongod",
     ]
   }

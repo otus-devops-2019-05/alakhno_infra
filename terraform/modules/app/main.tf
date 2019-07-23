@@ -29,8 +29,16 @@ resource "google_compute_instance" "app" {
   metadata {
     ssh-keys = "appuser:${file(var.public_key_path)}"
   }
+}
+
+resource "null_resource" "app_deploy" {
+  count = "${var.app_deploy ? 1 : 0}"
+  triggers = {
+    app_instance_id = "google_compute_instance.app.id"
+  }
 
   connection {
+    host  = "${google_compute_instance.app.network_interface.0.access_config.0.nat_ip}"
     type  = "ssh"
     user  = "appuser"
     agent = false
@@ -50,7 +58,7 @@ resource "google_compute_instance" "app" {
 
   provisioner "remote-exec" {
     inline = [
-      "${var.app_deploy ? "sh /tmp/deploy.sh" : "echo 'App deploy disabled'"}",
+      "sh /tmp/deploy.sh",
     ]
   }
 }

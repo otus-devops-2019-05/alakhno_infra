@@ -1,5 +1,26 @@
 # alakhno_infra
 
+# ДЗ - Занятие 12
+
+## 1. Отключение provisioner'ов в зависимости от значения переменной
+
+Чтобы в зависимости от значения переменной целиком отключать provisioner'ы в
+ресурсах, можно использовать
+[null_resource](https://www.terraform.io/docs/provisioners/null_resource.html)
+с `triggers` и `count`:
+
+```
+resource "null_resource" "app_deploy" {
+  count = "${var.app_deploy ? 1 : 0}"
+  triggers = {
+    app_instance_id = "google_compute_instance.app.id"
+  }
+
+  # connection and provisioners
+  ...
+}
+```
+
 # ДЗ - Занятие 11
 
 ## 1. Динамический инвентори для GCP
