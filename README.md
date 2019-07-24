@@ -21,6 +21,21 @@ resource "null_resource" "app_deploy" {
 }
 ```
 
+## 2. Настройка обратного проксирования при помощи Community-роли
+
+Для настройки обратного проксирования исопльзуется Community-роль
+[jdauphant.nginx](https://github.com/jdauphant/ansible-role-nginx).
+В requirements.yml в папку окружения добавляется запись вида:
+```
+- src: jdauphant.nginx
+  version: v2.21.1
+```
+
+Установка зависимостей производится припомощи команды вида
+```
+ansible-galaxy install -r environments/stage/requirements.yml
+```
+
 # ДЗ - Занятие 11
 
 ## 1. Динамический инвентори для GCP
