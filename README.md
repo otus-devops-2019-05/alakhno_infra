@@ -52,6 +52,37 @@ ansible-vault encrypt environments/stage/credentials.yml
 
 При выполнении плейбука файл автоматически расшифруется.
 
+## 4. Работа с динамическим инвентори в окружениях
+
+Для работы с динамическим инвентори используется плагин
+[gcp_compute](https://docs.ansible.com/ansible/latest/scenario_guides/guide_gce.html).
+
+В ansible.cfg необходимо добавить следующие настройки:
+```
+[inventory]
+enable_plugins = gcp_compute
+```
+
+В каждое из окружений добавляется файл inventory.gcp.yml, который используется
+в качестве инвентори:
+
+```
+plugin: gcp_compute
+projects:
+  - infra-244315
+auth_kind: serviceaccount
+service_account_file: service_account.json
+groups:
+  app: "'reddit-app' in name"
+  db: "'reddit-db' in name"
+```
+
+Внутренний адрес инстанса с базой данных в group_vars/app задаётся следующим
+образом:
+```
+db_host: "{{ hostvars[groups['db'][0]]['networkInterfaces'][0]['networkIP'] }}"
+```
+
 # ДЗ - Занятие 11
 
 ## 1. Динамический инвентори для GCP
