@@ -1,9 +1,0 @@
----
-- name: Configure App
-  hosts: app
-  become: true
-  vars:
-    db_host: "{{ hostvars[groups['db'][0]]['networkInterfaces'][0]['networkIP'] }}"
-
-  roles:
-    - app
