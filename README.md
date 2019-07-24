@@ -36,6 +36,22 @@ resource "null_resource" "app_deploy" {
 ansible-galaxy install -r environments/stage/requirements.yml
 ```
 
+## 3. Работа с Ansible Vault
+
+Путь к файлу с ключом шифрования можно прописать в ansible.cfg:
+```
+[defaults]
+...
+vault_password_file = vault.key
+``` 
+
+Чтобы зашифровать какой-либо файл используется команда следующего вида:
+```
+ansible-vault encrypt environments/stage/credentials.yml
+```
+
+При выполнении плейбука файл автоматически расшифруется.
+
 # ДЗ - Занятие 11
 
 ## 1. Динамический инвентори для GCP
