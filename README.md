@@ -83,6 +83,17 @@ groups:
 db_host: "{{ hostvars[groups['db'][0]]['networkInterfaces'][0]['networkIP'] }}"
 ```
 
+## 5. Настройка TravisCI
+
+Для отладки используется trytravis: https://github.com/sethmlarson/trytravis
+
+Вспомогательный репозиторий: https://github.com/alakhno/trytravis-sandbox
+
+Для запуска тестов используется скрипт test/run.sh, который запускает различные
+группы тестов в докер контейнере hw-test, созданном скриптом
+https://raw.githubusercontent.com/express42/otus-homeworks/2019-05/run.sh
+
+
 # ДЗ - Занятие 11
 
 ## 1. Динамический инвентори для GCP
