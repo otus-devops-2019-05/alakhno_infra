@@ -1,5 +1,7 @@
 # alakhno_infra
 
+[![Build Status](https://travis-ci.com/otus-devops-2019-05/alakhno_infra.svg?branch=master)](https://travis-ci.com/otus-devops-2019-05/alakhno_infra)
+
 # ДЗ - Занятие 12
 
 ## 1. Отключение provisioner'ов в зависимости от значения переменной
