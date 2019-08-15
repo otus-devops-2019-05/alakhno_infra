@@ -1,5 +1,101 @@
 # alakhno_infra
 
+[![Build Status](https://travis-ci.com/otus-devops-2019-05/alakhno_infra.svg?branch=master)](https://travis-ci.com/otus-devops-2019-05/alakhno_infra)
+
+# ДЗ - Занятие 12
+
+## 1. Отключение provisioner'ов в зависимости от значения переменной
+
+Чтобы в зависимости от значения переменной целиком отключать provisioner'ы в
+ресурсах, можно использовать
+[null_resource](https://www.terraform.io/docs/provisioners/null_resource.html)
+с `triggers` и `count`:
+
+```
+resource "null_resource" "app_deploy" {
+  count = "${var.app_deploy ? 1 : 0}"
+  triggers = {
+    app_instance_id = "google_compute_instance.app.id"
+  }
+
+  # connection and provisioners
+  ...
+}
+```
+
+## 2. Настройка обратного проксирования при помощи Community-роли
+
+Для настройки обратного проксирования исопльзуется Community-роль
+[jdauphant.nginx](https://github.com/jdauphant/ansible-role-nginx).
+В requirements.yml в папку окружения добавляется запись вида:
+```
+- src: jdauphant.nginx
+  version: v2.21.1
+```
+
+Установка зависимостей производится припомощи команды вида
+```
+ansible-galaxy install -r environments/stage/requirements.yml
+```
+
+## 3. Работа с Ansible Vault
+
+Путь к файлу с ключом шифрования можно прописать в ansible.cfg:
+```
+[defaults]
+...
+vault_password_file = vault.key
+``` 
+
+Чтобы зашифровать какой-либо файл используется команда следующего вида:
+```
+ansible-vault encrypt environments/stage/credentials.yml
+```
+
+При выполнении плейбука файл автоматически расшифруется.
+
+## 4. Работа с динамическим инвентори в окружениях
+
+Для работы с динамическим инвентори используется плагин
+[gcp_compute](https://docs.ansible.com/ansible/latest/scenario_guides/guide_gce.html).
+
+В ansible.cfg необходимо добавить следующие настройки:
+```
+[inventory]
+enable_plugins = gcp_compute
+```
+
+В каждое из окружений добавляется файл inventory.gcp.yml, который используется
+в качестве инвентори:
+
+```
+plugin: gcp_compute
+projects:
+  - infra-244315
+auth_kind: serviceaccount
+service_account_file: service_account.json
+groups:
+  app: "'reddit-app' in name"
+  db: "'reddit-db' in name"
+```
+
+Внутренний адрес инстанса с базой данных в group_vars/app задаётся следующим
+образом:
+```
+db_host: "{{ hostvars[groups['db'][0]]['networkInterfaces'][0]['networkIP'] }}"
+```
+
+## 5. Настройка TravisCI
+
+Для отладки используется trytravis: https://github.com/sethmlarson/trytravis
+
+Вспомогательный репозиторий: https://github.com/alakhno/trytravis-sandbox
+
+Для запуска тестов используется скрипт test/run.sh, который запускает различные
+группы тестов в докер контейнере hw-test, созданном скриптом
+https://raw.githubusercontent.com/express42/otus-homeworks/2019-05/run.sh
+
+
 # ДЗ - Занятие 11
 
 ## 1. Динамический инвентори для GCP
