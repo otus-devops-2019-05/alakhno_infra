@@ -15,6 +15,27 @@
 Поэтому добавил в tests/run.sh создание отдельного контейнера hw-self-test и
 сети hw-self-test-net для запуска своих тестов.
 
+## 2. Проксирование приложения с помощью nginx
+
+Для работы проксирования приложения с помощью nginx надо в блок определения
+провижинера appserver в Vagrantfile задать значение переменной nginx_sites для
+роли [jdauphant.nginx](https://github.com/jdauphant/ansible-role-nginx):
+```
+app.vm.provision "ansible" do |ansible|
+  ...
+  ansible.extra_vars = {
+    ...
+    "nginx_sites" => {
+      "default" => [
+        "listen 80",
+        "server_name 'reddit'",
+        "location / { proxy_pass http://127.0.0.1:9292; }"
+      ]
+    }
+  }
+end
+```
+
 # ДЗ - Занятие 12
 
 ## 1. Отключение provisioner'ов в зависимости от значения переменной
