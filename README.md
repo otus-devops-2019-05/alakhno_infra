@@ -36,6 +36,15 @@ app.vm.provision "ansible" do |ansible|
 end
 ```
 
+## 3. Тестирование при помощи Molecule и Testinfra
+
+1. Проверить, что БД слушает по нужному порту можно следующим образом
+([доки](https://testinfra.readthedocs.io/en/latest/modules.html#socket)):
+```
+def test_port_listening(host):
+    assert host.socket('tcp://0.0.0.0:27017').is_listening
+``` 
+
 # ДЗ - Занятие 12
 
 ## 1. Отключение provisioner'ов в зависимости от значения переменной
