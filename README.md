@@ -38,12 +38,36 @@ end
 
 ## 3. Тестирование при помощи Molecule и Testinfra
 
-1. Проверить, что БД слушает по нужному порту можно следующим образом
+Проверить, что БД слушает по нужному порту можно следующим образом
 ([доки](https://testinfra.readthedocs.io/en/latest/modules.html#socket)):
 ```
 def test_port_listening(host):
     assert host.socket('tcp://0.0.0.0:27017').is_listening
 ``` 
+
+## 4. Использование ролей db и app в плейбуках для сборки образов
+
+При использовании роли `db` в плейбуке `packer_db.yml` в packer шаблоне
+`db.json` следует указать тег `install` и выставить значение переменной
+`ANSIBLE_ROLES_PATH`:
+```
+"extra_arguments": ["--tags","install"],
+"ansible_env_vars": ["ANSIBLE_ROLES_PATH=ansible/roles"]
+```
+
+При использовании роли `app` в плейбуке `packer_app.yml` в packer шаблоне
+`app.json` следует указать тег `ruby` и выставить значение переменной
+`ANSIBLE_ROLES_PATH`:
+```
+"extra_arguments": ["--tags","ruby"],
+"ansible_env_vars": ["ANSIBLE_ROLES_PATH=ansible/roles"]
+```
+
+Сборка образов:
+```
+packer build -var-file=packer/variables.json packer/db.json
+packer build -var-file=packer/variables.json packer/app.json
+```
 
 # ДЗ - Занятие 12
 
