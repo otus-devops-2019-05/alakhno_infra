@@ -124,6 +124,22 @@ cd ansible
 ansible-playbook -i environments/prod/inventory.gcp.yml  playbooks/site.yml
 ```
 
+## 6. Локальное тестирование роли в репозитории otus-ansible-role-db
+
+Установка необходимых зависимостей:
+```shell script
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Запуск тестов:
+```shell script
+molecule create
+molecule converge
+moleculr verify
+```
+
 # ДЗ - Занятие 12
 
 ## 1. Отключение provisioner'ов в зависимости от значения переменной
