@@ -2,6 +2,144 @@
 
 [![Build Status](https://travis-ci.com/otus-devops-2019-05/alakhno_infra.svg?branch=master)](https://travis-ci.com/otus-devops-2019-05/alakhno_infra)
 
+# ДЗ - Занятие 13
+
+## 1. Не переиспользовать контейнер hw-test при запуске своих тестов
+
+Скрипт https://raw.githubusercontent.com/express42/otus-homeworks/2019-05/run.sh
+не создаёт контейнер hw-test для коммитов в ветку master. Поэтому этот контейнер
+нельзя переиспользовать для запуска своих тестов.
+
+Пример неудачного build'а: https://travis-ci.com/otus-devops-2019-05/alakhno_infra/builds/123326884
+
+Поэтому добавил в tests/run.sh создание отдельного контейнера hw-self-test и
+сети hw-self-test-net для запуска своих тестов.
+
+## 2. Проксирование приложения с помощью nginx
+
+Для работы проксирования приложения с помощью nginx надо в блок определения
+провижинера appserver в Vagrantfile задать значение переменной nginx_sites для
+роли [jdauphant.nginx](https://github.com/jdauphant/ansible-role-nginx):
+```
+app.vm.provision "ansible" do |ansible|
+  ...
+  ansible.extra_vars = {
+    ...
+    "nginx_sites" => {
+      "default" => [
+        "listen 80",
+        "server_name 'reddit'",
+        "location / { proxy_pass http://127.0.0.1:9292; }"
+      ]
+    }
+  }
+end
+```
+
+## 3. Тестирование при помощи Molecule и Testinfra
+
+Проверить, что БД слушает по нужному порту можно следующим образом
+([доки](https://testinfra.readthedocs.io/en/latest/modules.html#socket)):
+```
+def test_port_listening(host):
+    assert host.socket('tcp://0.0.0.0:27017').is_listening
+``` 
+
+Создание VM для проверки роли:
+```shell script
+cd ansible/roles/db
+molecule create
+```
+
+Применение плейбука к VM:
+```shell script
+molecule converge
+```
+
+Запуск тестов:
+```shell script
+molecule verify
+```
+
+## 4. Использование ролей db и app в плейбуках для сборки образов
+
+При использовании роли `db` в плейбуке `packer_db.yml` в packer шаблоне
+`db.json` следует указать тег `install` и выставить значение переменной
+`ANSIBLE_ROLES_PATH`:
+```
+"extra_arguments": ["--tags","install"],
+"ansible_env_vars": ["ANSIBLE_ROLES_PATH=ansible/roles"]
+```
+
+При использовании роли `app` в плейбуке `packer_app.yml` в packer шаблоне
+`app.json` следует указать тег `ruby` и выставить значение переменной
+`ANSIBLE_ROLES_PATH`:
+```
+"extra_arguments": ["--tags","ruby"],
+"ansible_env_vars": ["ANSIBLE_ROLES_PATH=ansible/roles"]
+```
+
+Сборка образов:
+```
+packer build -var-file=packer/variables.json packer/db.json
+packer build -var-file=packer/variables.json packer/app.json
+```
+
+## 5. Перенос роли db в отдельный репозиторий
+
+Роль db вынесена в репозиторий https://github.com/alakhno/otus-ansible-role-db
+
+В requirements.yml окружений stage и prod добавлена соответствутющая зависимость:
+```yaml
+- src: https://github.com/alakhno/otus-ansible-role-db.git
+  name: db
+```
+
+Установка зависимостей:
+```shell script
+ansible-galaxy install -r environments/stage/requirements.yml
+```
+
+Создание инстансов Stage окружения:
+```shell script
+cd terraform/stage
+terraform apply
+```
+
+Деплой приложения на Stage окружение:
+```shell script
+cd ansible
+ansible-playbook playbooks/site.yml
+```
+
+Создание инстансов Prod окружения:
+```shell script
+cd terraform/prod
+terraform apply
+```
+
+Деплой приложения на Prod окружение:
+```shell script
+cd ansible
+ansible-playbook -i environments/prod/inventory.gcp.yml  playbooks/site.yml
+```
+
+## 6. Локальное тестирование роли в репозитории otus-ansible-role-db
+
+Установка необходимых зависимостей:
+```shell script
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Запуск тестов:
+```shell script
+molecule create
+molecule converge
+moleculr verify
+```
+
 # ДЗ - Занятие 12
 
 ## 1. Отключение provisioner'ов в зависимости от значения переменной

@@ -16,4 +16,16 @@ packer/files/variables.json
 *.retry
 service_account.json
 jdauphant.nginx
+ansible/roles/db
 vault.key
+
+# Vagrant & molecule
+.vagrant/
+*.log
+*.pyc
+.molecule
+.cache
+.pytest_cache
+
+# Virtualenv
+venv
